@@ -45,6 +45,12 @@ app.use(passport.session());
 app.use(require("connect-flash")());
 
 app.use(require("./middleware/storeLocals"));
+
+const cookieParser = require("cookie-parser");
+const csrf = require("host-csrf");
+app.use(cookieParser(process.env.SESSION_SECRET));
+const csrfMiddleware = csrf.csrf();
+
 app.get("/", (req, res) => {
   res.render("index");
 });

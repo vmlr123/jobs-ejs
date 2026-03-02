@@ -1,7 +1,20 @@
 const express = require("express");
 require("express-async-errors");
 
+const helmet = require("helmet");
+const xss = require("xss-clean");
+const rateLimiter = require("express-rate-limit");
+
 const app = express();
+
+app.use(
+  rateLimiter({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+  }),
+);
+app.use(helmet());
+app.use(xss());
 
 app.set("view engine", "ejs");
 app.use(require("body-parser").urlencoded({ extended: true }));
@@ -50,6 +63,12 @@ const cookieParser = require("cookie-parser");
 const csrf = require("host-csrf");
 app.use(cookieParser(process.env.SESSION_SECRET));
 const csrfMiddleware = csrf.csrf();
+app.use(csrfMiddleware);
+
+app.use((req, res, next) => {
+  res.locals._csrf = csrf.getToken(req, res);
+  next();
+});
 
 app.get("/", (req, res) => {
   res.render("index");
@@ -59,6 +78,9 @@ app.use("/sessions", require("./routes/sessionRoutes"));
 const secretWordRouter = require("./routes/secretWord");
 const auth = require("./middleware/auth");
 app.use("/secretWord", auth, secretWordRouter);
+
+const items = require("./routes/items");
+app.use("/items", auth, items);
 
 app.use((req, res) => {
   res.status(404).send(`That page (${req.url}) was not found.`);

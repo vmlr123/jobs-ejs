@@ -27,6 +27,8 @@ const registerDo = async (req, res, next) => {
 };
 
 const logoff = (req, res) => {
+  const csrf = require("host-csrf");
+  csrf.clearToken(req, res);
   req.session.destroy(function (err) {
     if (err) {
       console.log(err);

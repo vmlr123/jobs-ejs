@@ -76,7 +76,7 @@ const deleteItem = async (req, res) => {
   }
   res.redirect("/items");
 };
-const getNewItemForm = async (req, res) => {
+const getNewItemForm = (req, res) => {
   res.render("item", { item: null });
 };
 const getItemToEdit = async (req, res) => {
